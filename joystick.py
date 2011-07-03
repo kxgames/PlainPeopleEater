@@ -40,7 +40,7 @@ class Joystick:
         # down is True when event is button down. False if event is button up.
         if down:
             if event.button == 0:
-                self.callbacks['shoot'] ()
+                self.callbacks['bite'] ()
 
     # Our joysticks don't have these:
     #if event.type == pygame.JOYBALLMOTION:

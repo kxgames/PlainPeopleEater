@@ -5,28 +5,15 @@ from collisions import *
 from shapes import *
 from flocking import *
 
-class Player:
-
-    def __init__(self, address):
-        self.address = address
-        self.points = 0
-
-    def score(self, points):
-        self.points += points
-
-    def get_points(self):
-        return self.points
-
 class Map:
-    """ Stores information about the game world.  This currently includes the size
-    of the map, the number of players in the game, the cumulative point value
-    of all the quaffles, and the amount of friction on the map. """
+    """ Stores information about the game world.  This currently includes the 
+    size of the map, the number of players in the game, and the amount of 
+    friction on the map. """
     # Map {{{1
-    def __init__(self, size, players, points, friction):
+    def __init__(self, size, players, friction):
         self.size = size
         self.friction = friction
 
-        self.points = points
         self.players = players
 
     def setup(self, world):
@@ -35,10 +22,7 @@ class Map:
     def update(self, time):
         pass
 
-    def place_sight(self):
-        return self.size.center
-
-    def place_target(self):
+    def place_token(self):
         x = random.random() * self.size.width
         y = random.random() * self.size.height
         return Vector(x, y)
@@ -57,10 +41,10 @@ class Map:
     # }}}1
 
 
-class Player(Sprite):
+class Player (Sprite):
     """ Represents a player.  The motion of these objects is primarily
     controlled by the player, but they will bounce off of walls. """
-    # Player {{{1
+    # Constructor {{{1
     def __init__(self, name, mass, force, size):
         Sprite.__init__(self)
 
@@ -72,15 +56,15 @@ class Player(Sprite):
 
         self.size = size
 
-    def get_size(self):
-        return self.size
+        self.mode = 'Person'
 
     def setup(self, world):
         self.world = world
 
-        position = world.get_map().place_sight()
+        position = world.get_map().place_token()
         Sprite.setup(self, position, self.size, self.force, 0.0)
-
+    # }}}1
+    # Update {{{1
     def update(self, time):
         map = self.world.get_map()
 
@@ -98,11 +82,30 @@ class Player(Sprite):
     def accelerate(self, direction):
         self.direction = direction
 
-    def shoot(self):
-        touching = Collisions.circles_touching
-
-        for target in self.world.targets:
-            if touching(self.circle, target.circle):
-                target.injure(self)
+    def bite(self):
+        me = self
+        you = self.world.get_you()
+        if Collisions.circles_touching (me, you):
+            self.world.bite()
     # }}}1
+
+    # Attributes {{{1
+    def is_eater(self):
+        monster = self.world.is_eater()
+        player = self.world.get_me() is self
+
+        if player and monster:
+            return True
+        elif not player and not monster:
+            return True
+        else:
+            return False
+
+    def is_person(self):
+        return not self.is_eater()
+
+    def get_size(self):
+        return self.size
+    # }}}1
+
 

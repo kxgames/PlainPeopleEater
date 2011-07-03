@@ -28,7 +28,7 @@ if role not in ("host", "client", "sandbox"):
 
 try:
     world = World()
-    systems = [ world, Gui(world), Network() ]
+    systems = [ world, Gui(world)]
 
     for system in systems:
         system.setup()
