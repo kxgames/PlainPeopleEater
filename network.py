@@ -1,7 +1,10 @@
+from __future__ import division
+
 import pipe
 import random
 import settings
 
+# Message Types {{{1
 class Event(object):
     """ Base class that represents a generic event. """
 
@@ -47,11 +50,15 @@ class Refresh(object):
     def __init__(self, world):
         self.player = world.get_me()
         self.button = world.get_button()
+# }}}1
 
-class Network:
+class Protocol:
+    """ Sends and receives the messages that keep the two clients in sync.  All
+    in game network communication is implemented by this protocol. """
 
-    def __init__(self, world, host, port):
-        self.world = world
+    # Setup {{{1
+    def __init__(self, game, host, port):
+        self.game = game
         self.address = host, port
 
         self.me = 0
@@ -65,35 +72,10 @@ class Network:
                 "incoming" : {},
                 "outgoing" : {} }
 
-    def host(self):
-        self.reliable.host()
-        self.express.host()
+    def setup(self):
+        raise NotImplementedError
 
-        self.me = 1
-        self.you = 2
-
-        behaviors = True, False
-
-        become_eater = random.choice(behaviors)
-        if become_eater: self.world.become_eater()
-
-        setup = Setup(self)
-        self.reliable.send(setup)
-
-    def connect(self):
-        self.reliable.connect()
-        self.express.connect()
-
-        setup = None
-        while not setup:
-            setup = self.reliable.receive()
-
-        self.me = setup.you
-        self.you = setup.me
-
-        if setup.become_eater:
-            self.world.become_eater()
-
+    # Incoming {{{1
     def callback(self, flavor, incoming, outgoing):
         try:
             self.callbacks["incoming"][flavor].append(incoming)
@@ -139,6 +121,7 @@ class Network:
         for callback in callbacks:
             callback(message.sender, message.receiver, message)
 
+    # Outgoing {{{1
     def eat_person(self):
         message = EatPerson(self)
 
@@ -156,11 +139,54 @@ class Network:
 
         self.execute("outgoing", message)
         self.reliable.send(message)
+    # }}}1
+
+class Host(Protocol):
+    """ A version of the network protocol that accepts connections on a known
+    part.  During the game, this protocol is no different from the peer's. """
+
+    # Setup {{{1
+    def setup(self):
+        self.reliable.host()
+        self.express.host()
+
+        self.me = 1
+        self.you = 2
+
+        behaviors = True, False
+
+        become_eater = random.choice(behaviors)
+        if become_eater: self.world.become_eater()
+
+        setup = Setup(self)
+        self.reliable.send(setup)
+    # }}}1
+
+class Peer(Protocol):
+    """ A version of the network protocol that connects to a known port.
+    During the game, this protocol is no different from the host's.
+
+    # Setup {{{1
+    def setup(self):
+        self.reliable.connect()
+        self.express.connect()
+
+        setup = None
+        while not setup:
+            setup = self.reliable.receive()
+
+        self.me = setup.you
+        self.you = setup.me
+
+        if setup.become_eater:
+            self.world.become_eater()
+    # }}}1
 
 class Dummy:
     """ A dummy network implementation that simply parrots back any messages it
     receives.  This might be useful for testing and debugging purposes. """
 
+    # Setup {{{1
     def __init__(self, world, host, port):
         self.world = world
         self.address = host, port
@@ -171,12 +197,10 @@ class Dummy:
         self.messages = []
         self.callbacks = {}
 
-    def host(self):
+    def setup(self):
         pass
 
-    def connect(self):
-        pass
-
+    # Incoming {{{1
     def callback(self, flavor, function):
         try:
             self.callbacks[flavor].append(function)
@@ -195,6 +219,7 @@ class Dummy:
         message = Update(self.world)
         self.messages = [message]
 
+    # Outgoing {{{1
     def eat_person(self):
         message = EatPerson(self)
         self.messages.append(message)
@@ -206,3 +231,4 @@ class Dummy:
     def flip_roles(self):
         message = FlipRoles(self)
         self.messages.append(message)
+    # }}}1

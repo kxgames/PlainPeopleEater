@@ -9,7 +9,8 @@ from shapes import *
 host = arguments.option("host", default='localhost')
 port = arguments.option("port", default=0, cast=int) + 11249
 
-refresh_timeout = 100
+clock_rate = 40
+refresh_rate = 100
 
 size = Rectangle.from_size(500, 500)
 map = Map(size=size, players=2, friction=50)

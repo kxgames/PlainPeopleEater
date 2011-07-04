@@ -6,9 +6,6 @@ from shapes import *
 from flocking import *
 
 class Map:
-    """ Stores information about the game world.  This currently includes the 
-    size of the map, the number of players in the game, and the amount of 
-    friction on the map. """
     # Map {{{1
     def __init__(self, size, players, friction):
         self.size = size
@@ -40,10 +37,7 @@ class Map:
         return self.players
     # }}}1
 
-
 class Player (Sprite):
-    """ Represents a player.  The motion of these objects is primarily
-    controlled by the player, but they will bounce off of walls. """
     # Constructor {{{1
     def __init__(self, name, mass, force, size):
         Sprite.__init__(self)

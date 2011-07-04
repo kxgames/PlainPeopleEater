@@ -1,52 +1,58 @@
 #!/usr/bin/env python
 
-from __future__ import division
+import settings
 
-import sys
-import gui, world, network
+import pygame
+from pygame.locals import *
 
 from gui import Gui
 from world import World
 from network import Network
 
-import pygame
-from pygame.locals import *
+class Game:
 
-# Decide if the game should be played over a network.
-try: role = sys.argv[1]
-except IndexError:
-    role = "sandbox"
+    def __init__(self):
+        self.world = World(self)
+        self.gui = Gui(self)
+        self.network = Host(self, host, port)
 
-# Figure out how to connect to the network.
-try: host = sys.argv[2]
-except IndexError:
-    host = "localhost"
+    def __init__(self):
+        return [self.world, self.gui, self.network]
 
-# Make sure all the arguments make sense.
-if role not in ("host", "client", "sandbox"):
-    sys.exit("The first argument must be 'host', 'client', or 'sandbox'.")
+    def get_world(self):
+        return self.world
 
-try:
-    world = World()
-    systems = [ world, Gui(world)]
+    def get_gui(self):
+        return self.gui
 
-    for system in systems:
-        system.setup()
+    def get_network(self):
+        return self.network
 
-    clock = pygame.time.Clock()
-    frequency = 40
+    def setup(self):
+        for system in self:
+            system.setup()
 
-    while world.is_playing():
-        time = clock.tick(frequency) / 1000
-        for system in systems:
-            system.update(time)
+    def play(self):
+        clock = pygame.time.Clock()
+        frequency = settings.clock_rate
 
-    for system in systems:
-        system.teardown()
+        while world.is_playing():
+            time = clock.tick(frequency) / 1000
+            for system in systems:
+                system.update(time)
 
-except IOError:
-    print "A network error caused the game to close unexpectedly."
+    def teardown(self):
+        for system in self:
+            system.teardown()
 
-except KeyboardInterrupt:
-    print
+if __name__ == "__main__":
 
+    try:
+        game = Game()
+
+        game.setup()
+        game.play()
+        game.teardown()
+
+    except KeyboardInterrupt:
+        print

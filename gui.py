@@ -11,10 +11,11 @@ from vector import *
 
 class Gui:
     # Constructor {{{1
-    def __init__ (self, world):
-        self.world = world
+    def __init__ (self, game):
+        self.game = game
 
     def setup(self):
+        self.world = self.game.get_world()
         self.map = self.world.get_map()
 
         pygame.init()
@@ -68,13 +69,13 @@ class Gui:
         # Draw {{{2
         background_color = Color("black")
         my_color = settings.my_color
-        you_color = settings.you_color
+        your_color = settings.your_color
         text_color = Color("green")
 
         if self.world.is_eater():
             my_color = Color("purple")
         else:
-            you_color = Color("purple")
+            your_color = Color("purple")
 
         screen = self.screen
         screen.fill(background_color)
@@ -88,7 +89,7 @@ class Gui:
             radius = player.get_size()
             color = my_color
             if player == you:
-                color = you_color
+                color = your_color
 
             pygame.draw.circle(screen, color, position.pygame, radius)
 
