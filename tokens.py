@@ -65,7 +65,7 @@ class Player (Sprite):
         Sprite.setup(self, position, self.size, self.force, self.speed)
     # }}}1
     # Update {{{1
-    def update(self, time):
+    def update(self, time, monster):
         map = self.world.get_map()
 
         # Set the acceleration.
@@ -135,11 +135,13 @@ class Button (Sprite):
         position = world.place_token()
         Sprite.setup(self, position, self.size)
 
-    def update (self, time):
-        self.elapsed += time
-        if self.elapsed >= self.timeout:
-            self.elapsed = 0.0
-            self.set_position(self.world.place_token())
+    def update (self, time, monster):
+        if not monster:
+            self.elapsed += time
+            if self.elapsed >= self.timeout:
+                self.elapsed = 0.0
+                self.set_position(self.world.place_token())
+                self.world.move_button()
 
     def teardown (self):
         pass

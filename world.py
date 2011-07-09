@@ -49,7 +49,7 @@ class World:
 
     def update (self, time):
         for token in self:
-            token.update(time)
+            token.update(time, self.behavior)
 
     # Methods {{{1
     def teardown(self):
@@ -101,6 +101,10 @@ class World:
 
     def place_token(self):
         return self.map.place_token()
+
+    def move_button(self):
+        # Should be called only when the eater.
+        pass
     # }}}1
 
     # Attributes {{{1
