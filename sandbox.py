@@ -3,7 +3,7 @@
 from game import Game
 
 try:
-    game = Game("client")
+    game = Game("sandbox")
     with game: game.play()
 
 except KeyboardInterrupt:
