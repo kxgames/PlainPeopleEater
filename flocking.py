@@ -126,13 +126,16 @@ class Sprite:
 
     def get_facing(self):
         return self.facing
+
+    def get_behavior_acceleration(self):
+        return self.behavior_acceleration
     
     def set_position(self, position):
         radius = self.circle.get_radius()
         self.circle = Circle(position, radius)
 
-    def get_behavior_acceleration(self):
-        return self.behavior_acceleration
+    def set_velocity(self, velocity):
+        self.velocity = velocity
     # }}}1
 
 class DummyTarget (Sprite):

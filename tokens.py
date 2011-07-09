@@ -96,6 +96,10 @@ class Player (Sprite):
 
     def lose_health(self, value):
         self.health -= value
+
+    def refresh(self, ghost):
+        self.set_position(ghost.get_position())
+        self.set_velocity(ghost.get_velocity())
     # }}}1
     # Attributes {{{1
     def is_eater(self):
@@ -136,3 +140,9 @@ class Button (Sprite):
         if self.elapsed >= self.timeout:
             self.elapsed = 0.0
             self.set_position(self.world.place_token())
+
+    def teardown (self):
+        pass
+
+    def refresh (self, ghost):
+        self.set_position(ghost.get_position())
