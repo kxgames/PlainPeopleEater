@@ -19,7 +19,7 @@ class Map:
     def teardown(self):
         pass
 
-    def update(self, time):
+    def update(self, time, monster):
         pass
 
     def place_token(self):
@@ -71,7 +71,7 @@ class Player (Sprite):
         Sprite.setup(self, position, self.size, self.force, self.speed)
     # }}}1
     # Update {{{1
-    def update(self, time):
+    def update(self, time, monster):
         map = self.world.get_map()
 
         # Set the acceleration.
@@ -102,6 +102,10 @@ class Player (Sprite):
 
     def lose_health(self, value):
         self.health -= value
+
+    def refresh(self, ghost):
+        self.set_position(ghost.get_position())
+        self.set_velocity(ghost.get_velocity())
     # }}}1
     # Attributes {{{1
     def is_eater(self):
@@ -144,8 +148,16 @@ class Button (Sprite):
         position = world.place_token()
         Sprite.setup(self, position, self.size)
 
-    def update (self, time):
-        self.elapsed += time
-        if self.elapsed >= self.timeout:
-            self.elapsed = 0.0
-            self.set_position(self.world.place_token())
+    def update (self, time, monster):
+        if not monster:
+            self.elapsed += time
+            if self.elapsed >= self.timeout:
+                self.elapsed = 0.0
+                self.set_position(self.world.place_token())
+                self.world.move_button()
+
+    def teardown (self):
+        pass
+
+    def refresh (self, ghost):
+        self.set_position(ghost.get_position())
