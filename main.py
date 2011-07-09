@@ -8,19 +8,19 @@ from pygame.locals import *
 
 from gui import Gui
 from world import World
-#from network import Dummy
+from network import Dummy
 
 class Game:
 
     def __init__(self):
         self.world = World(self)
         self.gui = Gui(self)
-        #self.network = Dummy(self)
+        self.network = Dummy(self)
 
     def __iter__(self):
         yield self.world
         yield self.gui
-        #yield self.network
+        yield self.network
 
     def get_world(self):
         return self.world

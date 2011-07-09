@@ -42,10 +42,11 @@ class Map:
 
 class Player (Sprite):
     # Constructor {{{1
-    def __init__(self, name, mass, force, size, speed):
+    def __init__(self, name, health, mass, force, size, speed):
         Sprite.__init__(self)
 
         self.name = name
+        self.health = health
 
         self.mass = mass
         self.force = force
@@ -60,13 +61,9 @@ class Player (Sprite):
     def setup(self, world):
         self.world = world
 
-        position = world.get_map().place_token()
+        position = world.place_token()
         Sprite.setup(self, position, self.size, self.force, self.speed)
     # }}}1
-
-    def teardown (self):
-        pass
-
     # Update {{{1
     def update(self, time):
         map = self.world.get_map()
@@ -80,8 +77,13 @@ class Player (Sprite):
         Sprite.update(self, time)
 
         # Bounce the sight off the walls.
-        boundary = self.world.get_map().get_size()
+        boundary = map.get_size()
         Sprite.bounce(self, time, boundary)
+    # }}}1
+
+    # Methods {{{1
+    def teardown (self):
+        pass
 
     def accelerate(self, direction):
         self.direction = direction
@@ -91,8 +93,10 @@ class Player (Sprite):
         you = self.world.get_you().get_circle()
         if Collisions.circles_touching (me, you):
             self.world.eat_player()
-    # }}}1
 
+    def lose_health(self, value):
+        self.health -= value
+    # }}}1
     # Attributes {{{1
     def is_eater(self):
         monster = self.world.is_eater()
@@ -108,8 +112,27 @@ class Player (Sprite):
     def is_person(self):
         return not self.is_eater()
 
-    def get_size(self):
-        return self.size
+    def get_health(self):
+        return self.health
     # }}}1
 
+class Button (Sprite):
+    def __init__ (self, size, timeout):
+        Sprite.__init__(self)
 
+        self.size = size
+        self.timeout = timeout
+        
+        self.elapsed = 0
+
+    def setup(self, world):
+        self.world = world
+
+        position = world.place_token()
+        Sprite.setup(self, position, self.size)
+
+    def update (self, time):
+        self.elapsed += time
+        if self.elapsed >= self.timeout:
+            self.elapsed = 0.0
+            self.set_position(self.world.place_token())

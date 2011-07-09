@@ -111,7 +111,7 @@ class Protocol:
 
         elif message.sender == self.you:
             message.sender = self.world.get_you()
-            message.sender = self.world.get_me()
+            message.receiver = self.world.get_me()
 
         else:
             raise AssertionError
@@ -219,11 +219,14 @@ class Dummy:
     def setup(self):
         self.world = self.game.get_world()
 
+    def teardown(self):
+        pass
+
     # Incoming {{{1
     def callback(self, flavor, incoming, outgoing):
         try:
             self.incoming[flavor].append(incoming)
-            self.outgoing[flavor].append(incoming)
+            self.outgoing[flavor].append(outgoing)
 
         except KeyError:
             self.incoming[flavor] = [incoming]

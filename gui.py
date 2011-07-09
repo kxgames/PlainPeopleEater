@@ -86,12 +86,19 @@ class Gui:
         
         for player in me, you:
             position = player.get_position()
-            radius = player.get_size()
+            radius = player.get_radius()
             color = my_color
             if player == you:
                 color = your_color
 
             pygame.draw.circle(screen, color, position.pygame, radius)
+
+        # Draw the button.
+        button = self.world.get_button()
+        b_color = settings.button_color
+        b_position = button.get_position()
+        b_radius = button.get_radius()
+        pygame.draw.circle(screen, b_color, b_position.pygame, b_radius)
 
         # Finish the update.
         pygame.display.flip()
