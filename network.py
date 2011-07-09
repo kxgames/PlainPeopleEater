@@ -12,6 +12,9 @@ class Event(object):
         self.sender = protocol.me
         self.receiver = protocol.you
 
+    def __str__(self):
+        return self.__class__.__name__
+
 class EatPerson(Event):
     """ Announces that the eater caught their lunch.  This doesn't necessarily
     kill the lunch, but it does damage it.  This message should be sent by the
@@ -64,8 +67,8 @@ class Protocol:
         self.me = 0
         self.you = 0
 
-        self.express = pipe.Datagram(host, port)
         self.reliable = pipe.Stream(host, port)
+        self.express = pipe.Datagram(host, port + 10)
 
         self.elapsed = 0
         self.callbacks = {
@@ -79,7 +82,7 @@ class Protocol:
     def callback(self, flavor, incoming, outgoing):
         try:
             self.callbacks["incoming"][flavor].append(incoming)
-            self.callbacks["outgoing"][flavor].append(incoming)
+            self.callbacks["outgoing"][flavor].append(outgoing)
 
         except KeyError:
             self.callbacks["incoming"][flavor] = [incoming]
@@ -101,6 +104,9 @@ class Protocol:
         for message in self.reliable.receive():
             self.execute("incoming", message)
 
+    # This method actually changes the message object it is given.  This means,
+    # for outgoing callbacks, that it has to be called after the message is
+    # sent.  Otherwise, a corrupted message will be sent out.
     def execute(self, event, message):
         flavor = type(message)
         callbacks = self.callbacks[event].get(flavor, [])
@@ -111,7 +117,7 @@ class Protocol:
 
         elif message.sender == self.you:
             message.sender = self.world.get_you()
-            message.sender = self.world.get_me()
+            message.receiver = self.world.get_me()
 
         else:
             raise AssertionError
@@ -123,20 +129,20 @@ class Protocol:
     def eat_person(self):
         message = EatPerson(self)
 
-        self.execute("outgoing", message)
         self.reliable.send(message)
+        self.execute("outgoing", message)
 
     def flip_roles(self):
         message = FlipRoles(self)
 
-        self.execute("outgoing", message)
         self.reliable.send(message)
+        self.execute("outgoing", message)
 
     def game_over(self):
         message = GameOver(self)
 
-        self.execute("outgoing", message)
         self.reliable.send(message)
+        self.execute("outgoing", message)
 
     # }}}1
 
