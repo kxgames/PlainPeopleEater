@@ -1,21 +1,18 @@
-#!/usr/bin/env python
 from __future__ import division
 
-import settings
-
-import pygame
+import pygame, settings
 from pygame.locals import *
 
 from gui import Gui
 from world import World
-from network import Dummy
+from network import Host, Client
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, host=False):
         self.world = World(self)
         self.gui = Gui(self)
-        self.network = Dummy(self)
+        self.network = Host(self) if host else Client(self)
 
     def __iter__(self):
         yield self.world
@@ -48,14 +45,3 @@ class Game:
         for system in self:
             system.teardown()
 
-if __name__ == "__main__":
-
-    try:
-        game = Game()
-
-        game.setup()
-        game.play()
-        game.teardown()
-
-    except KeyboardInterrupt:
-        print
