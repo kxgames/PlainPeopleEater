@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import division
 
 import pipe
@@ -257,3 +259,67 @@ class Dummy:
         message = FlipRoles(self)
         self.messages.append(message)
     # }}}1
+
+# Test Code {{{
+if __name__ == "__main__":
+    import time
+    import arguments
+    import threading
+
+    host = arguments.option("host", default='localhost')
+    port = arguments.option("port", default=0, cast=int) + 12345
+
+    class Game(object):
+        def __init__(self): self.world = World()
+        def get_world(self): return self.world
+
+    class World(object):
+        def __init__(self): self.behavior = False
+
+        def is_eater(self): return self.behavior
+        def become_eater(self): self.behavior = True
+
+        def update(self, time): pass
+        def refresh(self, player, button): pass
+
+        def get_me(self): return "eater" if self.behavior else "person"
+        def get_you(self): return "person" if self.behavior else "eater"
+        def get_button(self): return "button"
+        def get_map(self): return "map"
+
+    def incoming(sender, receiver, message):
+        print "Receiving '%s' from %s." % (message, sender)
+
+    def outgoing(sender, receiver, message):
+        print "Sending '%s' to %s." % (message, receiver)
+
+    server = network.Host(Game(), host, port)
+    client = network.Client(Game(), host, port)
+
+    server.callback(EatPerson, incoming, outgoing)
+    server.callback(FlipRoles, incoming, outgoing)
+    server.callback(GameOver, incoming, outgoing)
+
+    client.callback(EatPerson, incoming, outgoing)
+    client.callback(FlipRoles, incoming, outgoing)
+    client.callback(GameOver, incoming, outgoing)
+
+    hosting = threading.Thread(target=server.setup)
+    connecting = threading.Thread(target=client.setup)
+
+    hosting.daemon = connecting.daemon = True; 
+
+    print "Listening..."; hosting.start(); time.sleep(0.5)
+    print "Connecting..."; connecting.start(); time.sleep(1)
+    print
+
+    server.eat_person()
+    client.update(0); server.update(0); print
+
+    server.flip_roles()
+    server.update(0); client.update(0); print
+
+    server.game_over()
+    server.update(0); client.update(0)
+
+# }}}1
