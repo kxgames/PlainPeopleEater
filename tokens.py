@@ -19,7 +19,7 @@ class Map:
     def teardown(self):
         pass
 
-    def update(self, time):
+    def update(self, time, monster):
         pass
 
     def place_token(self):
