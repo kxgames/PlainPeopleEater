@@ -160,14 +160,19 @@ if __name__ == "__main__":
         response = "Goodbye world!"
 
         # These calls should not block or complain at all.
-        client.receive()
-        server.receive()
+        client.receive(); server.receive()
 
         client.send(request)
         assert request == server.receive()[0]
 
+        # These calls should not block or complain at all.
+        client.receive(); server.receive()
+
         server.send(response)
         assert response == client.receive()[0]
+
+        # These calls should not block or complain at all.
+        client.receive(); server.receive()
 
         client.close()
         server.close()

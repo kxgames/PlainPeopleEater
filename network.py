@@ -12,6 +12,9 @@ class Event(object):
         self.sender = protocol.me
         self.receiver = protocol.you
 
+    def __str__(self):
+        return self.__class__.__name__
+
 class EatPerson(Event):
     """ Announces that the eater caught their lunch.  This doesn't necessarily
     kill the lunch, but it does damage it.  This message should be sent by the
@@ -64,8 +67,7 @@ class Protocol:
         self.me = 0
         self.you = 0
 
-        self.express = pipe.Datagram(host, port)
-        self.reliable = pipe.Stream(host, port)
+        self.pipe = pipe.Stream(host, port)
 
         self.elapsed = 0
         self.callbacks = {
@@ -79,7 +81,7 @@ class Protocol:
     def callback(self, flavor, incoming, outgoing):
         try:
             self.callbacks["incoming"][flavor].append(incoming)
-            self.callbacks["outgoing"][flavor].append(incoming)
+            self.callbacks["outgoing"][flavor].append(outgoing)
 
         except KeyError:
             self.callbacks["incoming"][flavor] = [incoming]
@@ -90,17 +92,21 @@ class Protocol:
 
         if self.elapsed > settings.refresh_rate:
             message = Refresh(self.world)
-            self.express.send(message)
+            self.pipe.send(message)
 
-        for message in self.express.receive():
-            player = message.player
-            button = message.button
+        for message in self.pipe.receive():
+            if isinstance(message, Refresh):
+                player = message.player
+                button = message.button
 
-            self.world.refresh(player, button)
+                self.world.refresh(player, button)
 
-        for message in self.reliable.receive():
-            self.execute("incoming", message)
+            else:
+                self.execute("incoming", message)
 
+    # This method actually changes the message object it is given.  This means,
+    # for outgoing callbacks, that it has to be called after the message is
+    # sent.  Otherwise, a corrupted message will be sent out.
     def execute(self, event, message):
         flavor = type(message)
         callbacks = self.callbacks[event].get(flavor, [])
@@ -123,20 +129,20 @@ class Protocol:
     def eat_person(self):
         message = EatPerson(self)
 
+        self.pipe.send(message)
         self.execute("outgoing", message)
-        self.reliable.send(message)
 
     def flip_roles(self):
         message = FlipRoles(self)
 
+        self.pipe.send(message)
         self.execute("outgoing", message)
-        self.reliable.send(message)
 
     def game_over(self):
         message = GameOver(self)
 
+        self.pipe.send(message)
         self.execute("outgoing", message)
-        self.reliable.send(message)
 
     # }}}1
 
@@ -156,16 +162,11 @@ class Host(Protocol):
         become_eater = random.choice(behaviors)
         if become_eater: self.world.become_eater()
 
-        # The host() methods of the reliable and express pipe objects are both
-        # blocking, and this causes some timing problems.  One way to work
-        # around those problems is to establish the express connection after
-        # the reliable connection has been created and set up.
-        self.reliable.host()
+        self.pipe.host()
 
         setup = Setup(self)
-        self.reliable.send(setup)
+        self.pipe.send(setup)
 
-        self.express.host()
     # }}}1
 
 class Client(Protocol):
@@ -176,12 +177,11 @@ class Client(Protocol):
     def setup(self):
         Protocol.setup(self)
 
-        # Connect to the reliable pipe first.
-        self.reliable.connect()
+        self.pipe.connect()
 
         incoming = []
         while not incoming:
-            incoming = self.reliable.receive()
+            incoming = self.pipe.receive()
 
         setup = incoming.pop()
         assert not incoming
@@ -191,11 +191,6 @@ class Client(Protocol):
 
         if setup.become_eater:
             self.world.become_eater()
-
-        # Don't connect to the express pipe until after a setup message has
-        # been received over the reliable pipe.  This prevents a strange race
-        # condition.
-        self.express.connect()
 
     # }}}1
 
