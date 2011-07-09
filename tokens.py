@@ -57,6 +57,12 @@ class Player (Sprite):
 
         self.mode = 'Person'
 
+    def __getstate__(self):
+        state = {
+                "position" : self.get_position(),
+                "velocity" : self.get_velocity() }
+
+        return state
 
     def setup(self, world):
         self.world = world
@@ -124,6 +130,13 @@ class Button (Sprite):
         self.timeout = timeout
         
         self.elapsed = 0
+
+    def __getstate__(self):
+        state = {
+                "position" : self.get_position(),
+                "velocity" : self.get_velocity() }
+
+        return state
 
     def setup(self, world):
         self.world = world
