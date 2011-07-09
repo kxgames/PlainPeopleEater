@@ -5,19 +5,36 @@ from pygame.locals import *
 
 from gui import Gui
 from world import World
-from network import Host, Client
+from network import Host, Client, Sandbox
 
 class Game:
 
-    def __init__(self, host=False):
+    def __init__(self, role):
         self.world = World(self)
         self.gui = Gui(self)
-        self.network = Host(self) if host else Client(self)
+
+        # A dictionary of *class* objects.  The network system will be
+        # instantiated from one of these classes.
+        protocols = {
+                "host" : Host,
+                "client" : Client,
+                "sandbox" : Sandbox }
+
+        Protocol = protocols[role]
+        self.network = Protocol(self, settings.host, settings.port)
 
     def __iter__(self):
         yield self.world
         yield self.gui
         yield self.network
+
+    def __enter__(self):
+        for system in self:
+            system.setup()
+
+    def __exit__(self, *args):
+        for system in self:
+            system.teardown()
 
     def get_world(self):
         return self.world
@@ -28,10 +45,6 @@ class Game:
     def get_network(self):
         return self.network
 
-    def setup(self):
-        for system in self:
-            system.setup()
-
     def play(self):
         clock = pygame.time.Clock()
         frequency = settings.clock_rate
@@ -40,8 +53,4 @@ class Game:
             time = clock.tick(frequency) / 1000
             for system in self:
                 system.update(time)
-
-    def teardown(self):
-        for system in self:
-            system.teardown()
 

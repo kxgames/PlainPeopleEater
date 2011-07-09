@@ -196,7 +196,7 @@ class Client(Protocol):
 
     # }}}1
 
-class Dummy:
+class Sandbox:
     """ A dummy network implementation that simply parrots back any messages it
     receives.  This might be useful for testing and debugging purposes. """
 
