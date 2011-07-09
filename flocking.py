@@ -1,3 +1,4 @@
+from __future__ import division
 from vector import *
 from shapes import *
 
@@ -91,6 +92,7 @@ class Sprite:
     def check_velocity(self):
         if self.velocity.magnitude > self.speed:
             self.velocity = self.velocity.normal * self.speed
+
     def add_behavior(self, behavior):
         self.behaviors.append(behavior)
 

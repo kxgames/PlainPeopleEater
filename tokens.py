@@ -16,6 +16,9 @@ class Map:
     def setup(self, world):
         self.world = world
 
+    def teardown(self):
+        pass
+
     def update(self, time):
         pass
 
@@ -39,7 +42,7 @@ class Map:
 
 class Player (Sprite):
     # Constructor {{{1
-    def __init__(self, name, mass, force, size):
+    def __init__(self, name, mass, force, size, speed):
         Sprite.__init__(self)
 
         self.name = name
@@ -47,26 +50,33 @@ class Player (Sprite):
         self.mass = mass
         self.force = force
         self.direction = Vector.null()
+        self.speed = speed
 
         self.size = size
 
         self.mode = 'Person'
 
+
     def setup(self, world):
         self.world = world
 
         position = world.get_map().place_token()
-        Sprite.setup(self, position, self.size, self.force, 0.0)
+        Sprite.setup(self, position, self.size, self.force, self.speed)
     # }}}1
+
+    def teardown (self):
+        pass
+
     # Update {{{1
     def update(self, time):
         map = self.world.get_map()
 
         # Set the acceleration.
         force = self.force * self.direction
-        friction = -self.mass * self.velocity   # This is actually drag.
+        #friction = -self.mass * self.velocity   # This is actually drag.
 
-        self.acceleration = force + friction
+        #self.acceleration = force + friction
+        self.acceleration = force
         Sprite.update(self, time)
 
         # Bounce the sight off the walls.
@@ -77,10 +87,10 @@ class Player (Sprite):
         self.direction = direction
 
     def bite(self):
-        me = self
-        you = self.world.get_you()
+        me = self.get_circle()
+        you = self.world.get_you().get_circle()
         if Collisions.circles_touching (me, you):
-            self.world.bite()
+            self.world.eat_player()
     # }}}1
 
     # Attributes {{{1
