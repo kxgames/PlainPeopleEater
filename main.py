@@ -38,7 +38,7 @@ class Game:
 
         while world.is_playing():
             time = clock.tick(frequency) / 1000
-            for system in systems:
+            for system in self:
                 system.update(time)
 
     def teardown(self):

@@ -21,15 +21,15 @@ class EatPerson(Event):
         Event.__init__(self, protocol)
         self.damage = 0
 
-class GameOver(Event):
-    """ Announces that the game is over and that the current eater won.  This
-    message should get sent by the winning client. """
-    pass
-
 class FlipRoles(Event):
     """ Announces that both clients should simultaneously switch roles.  This
     message is sent by the lunch client, and it doesn't matter how it was
     triggered. """
+    pass
+
+class GameOver(Event):
+    """ Announces that the game is over and that the current eater won.  This
+    message should get sent by the winning client. """
     pass
 
 class Setup(object):
@@ -73,7 +73,7 @@ class Protocol:
                 "outgoing" : {} }
 
     def setup(self):
-        raise NotImplementedError
+        self.world = self.game.get_world()
 
     # Incoming {{{1
     def callback(self, flavor, incoming, outgoing):
@@ -82,16 +82,14 @@ class Protocol:
             self.callbacks["outgoing"][flavor].append(incoming)
 
         except KeyError:
-            self.callbacks["incoming"][flavor] = incoming
-            self.callbacks["outgoing"][flavor] = incoming
+            self.callbacks["incoming"][flavor] = [incoming]
+            self.callbacks["outgoing"][flavor] = [outgoing]
 
     def update(self, time):
         self.elapsed += time
 
-        if self.elapsed > settings.refresh_timeout:
-            world = self.world
-            message = Refresh(world)
-
+        if self.elapsed > settings.refresh_rate:
+            message = Refresh(self.world)
             self.express.send(message)
 
         for message in self.express.receive():
@@ -108,12 +106,12 @@ class Protocol:
         callbacks = self.callbacks[event].get(flavor, [])
 
         if message.sender == self.me:
-            message.sender = self.world.me
-            messade.receiver = self.world.you
+            message.sender = self.world.get_me()
+            message.receiver = self.world.get_you()
 
         elif message.sender == self.you:
-            message.sender = self.world.you
-            message.sender = self.world.me
+            message.sender = self.world.get_you()
+            message.sender = self.world.get_me()
 
         else:
             raise AssertionError
@@ -128,17 +126,18 @@ class Protocol:
         self.execute("outgoing", message)
         self.reliable.send(message)
 
+    def flip_roles(self):
+        message = FlipRoles(self)
+
+        self.execute("outgoing", message)
+        self.reliable.send(message)
+
     def game_over(self):
         message = GameOver(self)
 
         self.execute("outgoing", message)
         self.reliable.send(message)
 
-    def flip_roles(self):
-        message = FlipRoles(self)
-
-        self.execute("outgoing", message)
-        self.reliable.send(message)
     # }}}1
 
 class Host(Protocol):
@@ -147,8 +146,7 @@ class Host(Protocol):
 
     # Setup {{{1
     def setup(self):
-        self.reliable.host()
-        self.express.host()
+        Protocol.setup(self)
 
         self.me = 1
         self.you = 2
@@ -158,28 +156,47 @@ class Host(Protocol):
         become_eater = random.choice(behaviors)
         if become_eater: self.world.become_eater()
 
+        # The host() methods of the reliable and express pipe objects are both
+        # blocking, and this causes some timing problems.  One way to work
+        # around those problems is to establish the express connection after
+        # the reliable connection has been created and set up.
+        self.reliable.host()
+
         setup = Setup(self)
         self.reliable.send(setup)
+
+        self.express.host()
     # }}}1
 
-class Peer(Protocol):
+class Client(Protocol):
     """ A version of the network protocol that connects to a known port.
-    During the game, this protocol is no different from the host's.
+    During the game, this protocol is no different from the host's. """
 
     # Setup {{{1
     def setup(self):
-        self.reliable.connect()
-        self.express.connect()
+        Protocol.setup(self)
 
-        setup = None
-        while not setup:
-            setup = self.reliable.receive()
+        # Connect to the reliable pipe first.
+        self.reliable.connect()
+
+        incoming = []
+        while not incoming:
+            incoming = self.reliable.receive()
+
+        setup = incoming.pop()
+        assert not incoming
 
         self.me = setup.you
         self.you = setup.me
 
         if setup.become_eater:
             self.world.become_eater()
+
+        # Don't connect to the express pipe until after a setup message has
+        # been received over the reliable pipe.  This prevents a strange race
+        # condition.
+        self.express.connect()
+
     # }}}1
 
 class Dummy:
@@ -187,36 +204,46 @@ class Dummy:
     receives.  This might be useful for testing and debugging purposes. """
 
     # Setup {{{1
-    def __init__(self, world, host, port):
-        self.world = world
+    def __init__(self, game, host="", port=0):
+        self.game = game
         self.address = host, port
 
         self.me = 0
         self.you = 0
 
         self.messages = []
-        self.callbacks = {}
+
+        self.incoming = {}
+        self.outgoing = {}
 
     def setup(self):
-        pass
+        self.world = self.game.get_world()
 
     # Incoming {{{1
-    def callback(self, flavor, function):
+    def callback(self, flavor, incoming, outgoing):
         try:
-            self.callbacks[flavor].append(function)
+            self.incoming[flavor].append(incoming)
+            self.outgoing[flavor].append(incoming)
+
         except KeyError:
-            self.callbacks[flavor] = [function]
+            self.incoming[flavor] = [incoming]
+            self.outgoing[flavor] = [outgoing]
 
     def update(self, time):
         for message in self.messages:
-
             flavor = type(message)
-            callbacks = self.callbacks.get(flavor, [])
+            identity = self.world.get_me()
 
-            for callback in callbacks:
-                callback(message)
+            incoming = self.incoming.get(flavor, [])
+            outgoing = self.outgoing.get(flavor, [])
 
-        message = Update(self.world)
+            message.sender = identity
+            message.receiver = identity
+
+            for callback in incoming + outgoing:
+                callback(message.sender, message.receiver, message)
+
+        message = Refresh(self.world)
         self.messages = [message]
 
     # Outgoing {{{1
