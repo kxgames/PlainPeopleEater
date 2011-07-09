@@ -19,7 +19,9 @@ class World:
         self.playing = True
 
     def __iter__(self):
-        return (self.me, self.you, self.button, self.map)
+        #tokens = self.me, self.you, self.button, self.map
+        tokens = self.me, self.you, self.map
+        return iter(tokens)
 
     def setup (self):
         self.me = settings.me
@@ -29,11 +31,15 @@ class World:
         self.button = None
 
         for token in self:
-            self.setup(self)
+            token.setup(self)
+    
+    def teardown(self):
+        for token in self:
+            token.teardown()
 
     def update (self, time):
         for token in self:
-            self.update(time)
+            token.update(time)
 
     def refresh (self, you, button):
         # The two arguments are technically token objects, but they are really
@@ -47,16 +53,17 @@ class World:
         self.you.refresh(you)
         self.button.refresh(button)
 
-    def handle_eat_player(self, eater, person, message):
-        pass
+    def handle_eat_player(self, eater, person, message=None):
+        # Do hp and stuff
+        self.handle_game_over(eater, person, message)
 
     def handle_game_over(self, winner, loser, message=None):
         print "You win!" if winner is self.me else "You lose!"
         self.playing = False
 
     def eat_player(self):
-        network = self.hub.get_network()
-        self.handle_bite(self.me, self.you)
+        #network = self.hub.get_network()
+        self.handle_eat_player(self.me, self.you)
 
     def become_eater (self):
         self.behavior = True
@@ -81,4 +88,3 @@ class World:
 
     def get_map (self):
         return self.map
-    

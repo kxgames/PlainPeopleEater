@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division
 
 import settings
 
@@ -7,17 +8,19 @@ from pygame.locals import *
 
 from gui import Gui
 from world import World
-from network import Network
+#from network import Dummy
 
 class Game:
 
     def __init__(self):
         self.world = World(self)
         self.gui = Gui(self)
-        self.network = Host(self, host, port)
+        #self.network = Dummy(self)
 
-    def __init__(self):
-        return [self.world, self.gui, self.network]
+    def __iter__(self):
+        yield self.world
+        yield self.gui
+        #yield self.network
 
     def get_world(self):
         return self.world
@@ -36,9 +39,9 @@ class Game:
         clock = pygame.time.Clock()
         frequency = settings.clock_rate
 
-        while world.is_playing():
+        while self.world.is_playing():
             time = clock.tick(frequency) / 1000
-            for system in systems:
+            for system in self:
                 system.update(time)
 
     def teardown(self):
