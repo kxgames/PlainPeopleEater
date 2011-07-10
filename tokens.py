@@ -153,8 +153,8 @@ class Button (Sprite):
             self.elapsed += time
             if self.elapsed >= self.timeout:
                 self.elapsed = 0.0
-                self.set_position(self.world.place_token())
-                self.world.move_button()
+                #self.set_position(self.world.place_token())
+                #self.world.move_button()
 
     def teardown (self):
         pass
