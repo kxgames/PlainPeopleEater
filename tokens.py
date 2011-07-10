@@ -59,7 +59,7 @@ class Player (Sprite):
 
     def __getstate__(self):
         state = {
-                "position" : self.get_position(),
+                "circle" : self.get_circle(),
                 "velocity" : self.get_velocity() }
 
         return state
@@ -104,7 +104,7 @@ class Player (Sprite):
         self.health -= value
 
     def refresh(self, ghost):
-        self.set_position(ghost.get_position())
+        self.set_circle(ghost.get_circle())
         self.set_velocity(ghost.get_velocity())
     # }}}1
     # Attributes {{{1
@@ -137,7 +137,7 @@ class Button (Sprite):
 
     def __getstate__(self):
         state = {
-                "position" : self.get_position(),
+                "circle" : self.get_circle(),
                 "velocity" : self.get_velocity() }
 
         return state
@@ -160,4 +160,4 @@ class Button (Sprite):
         pass
 
     def refresh (self, ghost):
-        self.set_position(ghost.get_position())
+        self.set_circle(ghost.get_circle())

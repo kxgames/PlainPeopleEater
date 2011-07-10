@@ -54,3 +54,5 @@ class Game:
             for system in self:
                 system.update(time)
 
+        raw_input('press enter to close game')
+

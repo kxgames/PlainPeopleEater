@@ -1,3 +1,4 @@
+from __future__ import division
 import arguments
 
 import pygame
@@ -10,7 +11,7 @@ host = arguments.option("host", default='')
 port = arguments.option("port", default=0, cast=int) + 11249
 
 clock_rate = 40
-refresh_rate = 100
+refresh_rate = 100 / 1000
 
 size = Rectangle.from_size(500, 500)
 map = Map(size=size, players=2, friction=50)

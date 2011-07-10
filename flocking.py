@@ -103,9 +103,6 @@ class Sprite:
     def get_position(self):
         return self.circle.center
 
-    def set_position(self, position):
-        self.circle = Circle.move(self.circle, position - self.circle.center)
-
     def get_velocity(self):
         return self.velocity
 
@@ -131,8 +128,10 @@ class Sprite:
         return self.behavior_acceleration
     
     def set_position(self, position):
-        radius = self.circle.get_radius()
-        self.circle = Circle(position, radius)
+        self.circle = Circle.move(self.circle.position - self.circle.center)
+
+    def set_circle(self, circle):
+        self.circle = circle
 
     def set_velocity(self, velocity):
         self.velocity = velocity
