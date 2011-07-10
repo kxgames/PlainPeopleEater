@@ -104,6 +104,8 @@ class Stream(Pipe):
         greeter = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         address = self.address
 
+        print "Host: Binding %s:%s." % address
+
         greeter.bind(address)
         greeter.listen(5)
 
@@ -112,6 +114,9 @@ class Stream(Pipe):
 
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        print "Client: Connecting to %s:%s." % address
+
         self.socket.connect(self.address)
         self.socket.setblocking(False)
 
