@@ -1,4 +1,6 @@
-import sys
+from __future__ import division
+
+import sys, math
 import joystick
 import settings
 
@@ -93,11 +95,32 @@ class Gui:
 
         # Draw the button.
         button = self.world.get_button()
+
         color = settings.button_color
         position = button.get_position().get_pygame()
-        radius = button.get_radius()
 
-        pygame.draw.circle(screen, color, position, radius)
+        radius = button.get_radius()
+        progress = 1 - button.get_elapsed() / button.get_timeout()
+        
+        points = [position]
+
+        for index in range(50):
+            fraction = index / 50
+            angle = 2 * math.pi * fraction
+
+            if fraction > progress:
+                break
+
+            x = position[0] + radius * math.cos(angle)
+            y = position[1] + radius * math.sin(angle)
+
+            point = x, y
+            points.append(point)
+
+        if len(points) > 2:
+            pygame.draw.polygon(screen, color, points)
+
+        #pygame.draw.circle(screen, color, position, radius)
 
         # Finish the update.
         pygame.display.flip()

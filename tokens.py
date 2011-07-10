@@ -156,8 +156,6 @@ class Button (Sprite):
 
         self.elapsed = 0.0
         self.world.move_button()
-        position = self.world.place_token()
-        self.set_position(position)
 
     def teardown(self):
         pass
@@ -165,3 +163,9 @@ class Button (Sprite):
     def refresh(self, ghost):
         if not self.world.is_eater(): return
         self.set_circle(ghost.get_circle())
+
+    def get_elapsed(self):
+        return self.elapsed
+
+    def get_timeout(self):
+        return self.timeout
