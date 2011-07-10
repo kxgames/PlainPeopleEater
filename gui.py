@@ -28,8 +28,6 @@ class Gui:
         if pygame.joystick.get_count() == 0:
             print "No joystick! Aborting...."
             sys.exit(0)
-        else:
-            print 'Number of Joysticks:', pygame.joystick.get_count()
 
         # Callback dictionary for joystick event handling.
         joystick_callbacks = {
@@ -50,7 +48,7 @@ class Gui:
     def react(self, time):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                sys.exit(0)
+                self.world.game_over()
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:

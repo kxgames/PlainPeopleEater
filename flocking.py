@@ -128,7 +128,7 @@ class Sprite:
         return self.behavior_acceleration
     
     def set_position(self, position):
-        self.circle = Circle.move(position - self.circle.center)
+        self.circle = Circle.move(self.circle, position - self.circle.center)
 
     def set_circle(self, circle):
         self.circle = circle

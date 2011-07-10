@@ -34,22 +34,22 @@ class World:
         for token in self:
             token.setup(self)
 
-        my_network = self.game.get_network()
-        my_network.callback(
+        self.network = self.game.get_network()
+
+        self.network.callback(
                 flavor=network.EatPerson,
                 incoming=self.handle_eat_player,
-                outgoing=self.handle_eat_player
-                )
-        my_network.callback(
-                network.GameOver,
-                self.handle_game_over,
-                self.handle_game_over
-                )
+                outgoing=self.handle_eat_player)
+
+        self.network.callback(
+                flavor=network.GameOver,
+                incoming=self.handle_game_over,
+                outgoing=self.handle_game_over)
     # }}}1
 
     def update (self, time):
         for token in self:
-            token.update(time, self.behavior)
+            token.update(time)
 
     # Methods {{{1
     def teardown(self):
@@ -58,12 +58,8 @@ class World:
 
     def refresh (self, you, button):
         # The two arguments are technically token objects, but they are really
-        # degenerate since they came over the network and were never properly
-        # set up.  In fact, they only have position and velocity attributes.
-        # (Well, I haven't actually implemented this yet, but I will.) 
-        #
-        # Also, I think it would be a good idea to give the token objects a
-        # refresh() method that takes care of updating the existing objects.
+        # degenerate since they came over the network and were never set up.
+        # In fact, they only have circle and velocity attributes.  
 
         self.you.refresh(you)
         self.button.refresh(button)
@@ -72,29 +68,25 @@ class World:
         if eater is self.me:
             self.you.lose_health(1)
             you = self.you.get_health()
-            print "You have bitten the other player! Their health: %i" %you
+            print "You have bitten the other player! Their health: %i" % you
 
             if self.you.get_health() <= 0:
-                self.game.get_network().game_over()
-        else:
+                self.game_over()
+
+        elif eater is self.you:
             self.me.lose_health(1)
             me = self.me.get_health()
-            print "Other player has bitten you! Your health: %i" %me
+            print "The other player has bitten you! Your health: %i" % me
 
-            # The following code is for Dummy networking only!
-            #if self.me.get_health() <= 0:
-                #self.game.get_network().game_over()
+        else:
+            raise AssertionError
 
     def handle_game_over(self, winner, loser, message=None):
-        if winner is self.me:
-            print "You win!"
-            self.playing = False
-        else:
-            print "You lose!"
-            self.playing = False
+        print "You win!" if winner is self.me else "You lose!"
+        self.playing = False
 
     def eat_player(self):
-        self.game.get_network().eat_person()
+        self.network.eat_person()
 
     def become_eater (self):
         self.behavior = True
@@ -102,9 +94,9 @@ class World:
     def place_token(self):
         return self.map.place_token()
 
-    def move_button(self):
-        # Should be called only when the eater.
-        pass
+    def game_over(self):
+        self.network.game_over()
+
     # }}}1
 
     # Attributes {{{1
