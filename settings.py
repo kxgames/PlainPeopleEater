@@ -6,7 +6,7 @@ from pygame.locals import *
 from tokens import *
 from shapes import *
 
-host = arguments.option("host", default='localhost')
+host = arguments.option("host", default='')
 port = arguments.option("port", default=0, cast=int) + 11249
 
 clock_rate = 40
