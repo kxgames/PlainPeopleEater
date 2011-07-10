@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+python game.py --role=client $*

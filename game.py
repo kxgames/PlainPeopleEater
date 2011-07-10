@@ -9,7 +9,7 @@ from network import Host, Client, Sandbox
 
 class Game:
 
-    def __init__(self, role):
+    def __init__(self):
         self.world = World(self)
         self.gui = Gui(self)
 
@@ -20,7 +20,7 @@ class Game:
                 "client" : Client,
                 "sandbox" : Sandbox }
 
-        Protocol = protocols[role]
+        Protocol = protocols[settings.role]
         self.network = Protocol(self, settings.host, settings.port)
 
     def __iter__(self):
@@ -54,5 +54,13 @@ class Game:
             for system in self:
                 system.update(time)
 
-        raw_input('press enter to close game')
+        raw_input("Press any key to exit the game.")
 
+if __name__ == "__main__":
+    try: 
+        game = Game()
+        with game:
+            game.play()
+
+    except KeyboardInterrupt:
+        print
