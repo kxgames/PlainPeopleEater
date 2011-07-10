@@ -45,6 +45,7 @@ class Gui:
         self.react(time)
         self.draw(time)
 
+    # React {{{1
     def react(self, time):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -63,43 +64,43 @@ class Gui:
             if event.type == pygame.JOYBUTTONUP:
                 self.joystick.button_event(event, False)
 
+    # Draw {{{1
     def draw(self, time):
-        # Draw {{{2
         background_color = Color("black")
         my_color = settings.my_color
         your_color = settings.your_color
         text_color = Color("green")
 
-        if self.world.is_eater():
-            my_color = Color("purple")
-        else:
-            your_color = Color("purple")
-
         screen = self.screen
         screen.fill(background_color)
 
         # Draw the players.
-        me = self.world.get_me()
-        you = self.world.get_you()
-        
-        for player in me, you:
-            position = player.get_position()
-            radius = player.get_radius()
-            color = my_color
-            if player == you:
-                color = your_color
+        if self.world.is_eater():
+            my_color = settings.eater_color
+            your_color = settings.your_color
+        else:
+            my_color = settings.my_color
+            your_color = settings.eater_color
 
-            pygame.draw.circle(screen, color, position.pygame, radius)
+        me = self.world.get_me(), my_color
+        you = self.world.get_you(), your_color
+        
+        for player, color in me, you:
+            position = player.get_position().get_pygame()
+            radius = player.get_radius()
+
+            pygame.draw.circle(screen, color, position, radius)
 
         # Draw the button.
         button = self.world.get_button()
-        b_color = settings.button_color
-        b_position = button.get_position()
-        b_radius = button.get_radius()
-        pygame.draw.circle(screen, b_color, b_position.pygame, b_radius)
+        color = settings.button_color
+        position = button.get_position().get_pygame()
+        radius = button.get_radius()
+
+        pygame.draw.circle(screen, color, position, radius)
 
         # Finish the update.
         pygame.display.flip()
-        # }}}2
+
     # }}}1
 

@@ -155,6 +155,7 @@ class Button (Sprite):
         if self.elapsed < self.timeout: return
 
         self.elapsed = 0.0
+        self.world.move_button()
         position = self.world.place_token()
         self.set_position(position)
 

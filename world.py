@@ -4,6 +4,7 @@ import settings
 import network
 
 from tokens import *
+from collisions import *
 
 class World:
     # Constructor {{{1
@@ -42,6 +43,11 @@ class World:
                 outgoing=self.handle_eat_player)
 
         self.network.callback(
+                flavor=network.FlipRoles,
+                incoming=self.handle_flip_roles,
+                outgoing=self.handle_flip_roles)
+
+        self.network.callback(
                 flavor=network.GameOver,
                 incoming=self.handle_game_over,
                 outgoing=self.handle_game_over)
@@ -50,6 +56,14 @@ class World:
     def update (self, time):
         for token in self:
             token.update(time)
+
+        if self.is_person():
+            person = self.get_me().get_circle()
+            button = self.get_button().get_circle()
+
+            # Switch roles if the person has reached the button.
+            if Collisions.circles_touching(person, button):
+                self.flip_roles()
 
     # Methods {{{1
     def teardown(self):
@@ -64,7 +78,7 @@ class World:
         self.you.refresh(you)
         self.button.refresh(button)
 
-    def handle_eat_player(self, eater, person, message=None):
+    def handle_eat_player(self, eater, person, message):
         if eater is self.me:
             self.you.lose_health(1)
             you = self.you.get_health()
@@ -81,21 +95,38 @@ class World:
         else:
             raise AssertionError
 
-    def handle_game_over(self, winner, loser, message=None):
+    def handle_flip_roles(self, eater, person, message):
+        if eater is self.me: self.become_eater()
+        elif eater is message.you: self.become_person()
+        else: raise AssertionError
+
+    def handle_game_over(self, winner, loser, message):
         print "You win!" if winner is self.me else "You lose!"
         self.playing = False
 
     def eat_player(self):
         self.network.eat_person()
 
-    def become_eater (self):
+    def become_eater(self):
         self.behavior = True
+
+    def become_person(self):
+        self.behavior = False
 
     def place_token(self):
         return self.map.place_token()
 
     def game_over(self):
         self.network.game_over()
+
+    def flip_roles(self):
+        print "Switching roles!"
+        self.network.flip_roles()
+        self.move_button()
+
+    def move_button(self):
+        position = self.place_token()
+        self.button.set_position(position)
 
     # }}}1
 
