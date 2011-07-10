@@ -92,6 +92,9 @@ class Pipe:
             # This is the same thing, but for windows.
             if feedback.errno == 10035: pass
 
+            # This might be a mistake: Resource temporarily unavailable.
+            if feedback.errno == 11: pass
+
             # Any other type of exception is a real error.
             else: raise
 
