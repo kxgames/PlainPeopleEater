@@ -89,6 +89,9 @@ class Pipe:
             # This exception just means that there are no more bytes to read.
             if feedback.errno == errno.EAGAIN: pass
 
+            # This is the same thing, but for windows.
+            if feedback.errno == 10035: pass
+
             # Any other type of exception is a real error.
             else: raise
 
@@ -104,8 +107,6 @@ class Stream(Pipe):
         greeter = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         address = self.address
 
-        print "Host: Binding %s:%s." % address
-
         greeter.bind(address)
         greeter.listen(5)
 
@@ -114,8 +115,6 @@ class Stream(Pipe):
 
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        print "Client: Connecting to %s:%s." % self.address
 
         self.socket.connect(self.address)
         self.socket.setblocking(False)
