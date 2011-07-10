@@ -115,7 +115,7 @@ class Stream(Pipe):
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        print "Client: Connecting to %s:%s." % address
+        print "Client: Connecting to %s:%s." % self.address
 
         self.socket.connect(self.address)
         self.socket.setblocking(False)

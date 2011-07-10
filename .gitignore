@@ -1,6 +1,2 @@
 *.swp
 *.pyc
-
-collisions.py
-shapes.py
-vector.py
