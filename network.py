@@ -79,6 +79,9 @@ class Protocol:
     def setup(self):
         self.world = self.game.get_world()
 
+    def teardown(self):
+        self.pipe.close()
+
     # Incoming {{{1
     def callback(self, flavor, incoming, outgoing):
         try:
