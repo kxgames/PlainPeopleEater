@@ -82,8 +82,8 @@ class World:
             print "Other player has bitten you! Your health: %i" %me
 
             # The following code is for Dummy networking only!
-            if self.me.get_health() <= 0:
-                self.game.get_network().game_over()
+            #if self.me.get_health() <= 0:
+                #self.game.get_network().game_over()
 
     def handle_game_over(self, winner, loser, message=None):
         if winner is self.me:
