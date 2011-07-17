@@ -10,6 +10,8 @@ class Message:
     length = 4096
     delimiter = '\n\n'
 
+    overflow = ""
+
     @staticmethod
     def pack(message):
         packet = pickle.dumps(message)
@@ -21,13 +23,25 @@ class Message:
     @staticmethod
     def unpack(stream):
         messages = []
+
+        stream = Message.overflow + stream
         packets = stream.split(Message.delimiter)
 
         for packet in packets:
-            if not packet: continue
+            try:
+                message = pickle.loads(packet)
+                messages.append(message)
+
+            # This is triggered when an empty string is unpickled, and can be
+            # safely ignored.
+            except EOFError:
+                continue
             
-            message = pickle.loads(packet)
-            messages.append(message)
+            # This is triggered whenever you try to load an incomplete pickle.
+            # Save the partial packet and wait for the rest to come in over the
+            # network.
+            except ValueError:
+                self.overflow = packet; break
 
         return messages
 
