@@ -28,6 +28,7 @@ class Message:
         packets = stream.split(Message.delimiter)
 
         for packet in packets:
+            if not packet: continue
             try:
                 message = pickle.loads(packet)
                 messages.append(message)
