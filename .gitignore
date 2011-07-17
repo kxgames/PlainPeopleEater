@@ -1,2 +1,5 @@
 *.swp
 *.pyc
+
+settings/network.py
+settings/player.py

@@ -63,7 +63,7 @@ class Joystick(Controller):
 
         if not pygame.joystick.get_count():
             print "No joystick found."
-            print "Consider using the mouse-pad controller."
+            print "Consider using the keyboard controller."
             sys.exit()
 
         self.joystick = pygame.joystick.Joystick(0)
