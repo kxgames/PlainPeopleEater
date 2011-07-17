@@ -91,7 +91,7 @@ class Joystick(Controller):
             if event.axis == X: self.x = event.value
             if event.axis == Y: self.y = event.value
 
-            direction = vector.Vector(self.x, self.y)
+            direction = Vector(self.x, self.y)
             self.callbacks["motion"](direction)
 
         elif event.axis == Z:
