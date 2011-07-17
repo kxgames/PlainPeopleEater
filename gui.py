@@ -1,8 +1,9 @@
 from __future__ import division
 
 import sys, math
-import joystick
+
 import settings
+import controls
 
 import pygame
 from pygame.locals import *
@@ -10,64 +11,57 @@ from pygame.locals import *
 from shapes import *
 from vector import *
 
-
 class Gui:
     # Constructor {{{1
     def __init__ (self, game):
         self.game = game
 
+        self.controls = {
+                "joystick" : controls.Joystick(self),
+                "keyboard" : controls.Keyboard(self),
+                "experimental" : controls.Experimental(self) }
+
+    # Attributes {{{1
+    def get_game(self):
+        return self.game
+
+    def get_world(self):
+        return self.world
+
+    #}}}1
+
+    # Update {{{1
     def setup(self):
+        pygame.init()
+
+        # Save references to other game systems.
         self.world = self.game.get_world()
         self.map = self.world.get_map()
 
-        pygame.init()
-
+        # Create a window to run the game in.
         self.size = self.map.get_size().get_pygame().size
         self.screen = pygame.display.set_mode(self.size)
 
         self.font = pygame.font.Font(None, 20)
 
-        if pygame.joystick.get_count() == 0:
-            print "No joystick! Aborting...."
-            sys.exit(0)
+        # Set up the user controls.
+        self.input = self.controls[settings.controller]
+        self.input.setup()
 
-        # Callback dictionary for joystick event handling.
-        joystick_callbacks = {
-                'direction' : self.world.get_me().accelerate,
-                'bite' : self.world.get_me().bite }
+        player = self.world.get_me()
 
-        self.joystick = joystick.Joystick(joystick_callbacks)
-    #}}}1
+        self.input.on_motion(player.accelerate)
+        self.input.on_button(player.bite)
+
+    def update(self, time):
+        self.input.update()
+        self.draw()
 
     def teardown(self):
         pass
 
-    # Update {{{1
-    def update(self, time):
-        self.react(time)
-        self.draw(time)
-
-    # React {{{1
-    def react(self, time):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.world.game_over()
-            
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit(0)
-            
-            if event.type == pygame.JOYAXISMOTION:
-                self.joystick.axis_event(event)
-
-            if event.type == pygame.JOYBUTTONDOWN:
-                self.joystick.button_event(event, True)
-
-            if event.type == pygame.JOYBUTTONUP:
-                self.joystick.button_event(event, False)
-
     # Draw {{{1
-    def draw(self, time):
+    def draw(self):
         background_color = Color("black")
         my_color = settings.my_color
         your_color = settings.your_color
