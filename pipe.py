@@ -41,7 +41,7 @@ class Message:
             # Save the partial packet and wait for the rest to come in over the
             # network.
             except ValueError:
-                self.overflow = packet; break
+                Message.overflow = packet; break
 
         return messages
 
