@@ -29,6 +29,7 @@ class Message:
 
         for packet in packets:
             if not packet: continue
+
             try:
                 message = pickle.loads(packet)
                 messages.append(message)
@@ -42,7 +43,7 @@ class Message:
             # Save the partial packet and wait for the rest to come in over the
             # network.
             except ValueError:
-                Message.overflow = packet; break
+                Message.overflow = Message.delimiter + packet; break
 
         return messages
 
