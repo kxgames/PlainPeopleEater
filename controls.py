@@ -75,7 +75,10 @@ class Joystick(Controller):
         appropriate callback. """
 
         for event in pygame.event.get():
-            self.handlers[event.type](event)
+            try:
+                self.handlers[event.type](event)
+            except KeyError:
+                pass
 
     # Event Handlers {{{1
     def motion_event(self, event):
