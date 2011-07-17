@@ -52,7 +52,7 @@ class Joystick(Controller):
         self.handlers = {
                 QUIT : self.quit_event,
                 JOYAXISMOTION : self.motion_event,
-                JOYBUTTONDOWN: self.button_event }
+                JOYBUTTONDOWN : self.button_event }
 
     # Update {{{1
     def setup(self):
