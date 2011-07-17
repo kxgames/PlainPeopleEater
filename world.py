@@ -7,6 +7,7 @@ from tokens import *
 from collisions import *
 
 class World:
+
     # Constructor {{{1
     def __init__ (self, game):
         self.game = game
@@ -25,6 +26,30 @@ class World:
         #tokens = self.me, self.you, self.map
         return iter(tokens)
 
+    # Attributes {{{1
+    def is_eater (self):
+        return self.behavior
+
+    def is_person (self):
+        return not self.behavior
+
+    def is_playing (self):
+        return self.playing
+
+    def get_me (self):
+        return self.me
+    
+    def get_you (self):
+        return self.you
+
+    def get_button (self):
+        return self.button
+
+    def get_map (self):
+        return self.map
+    # }}}1
+
+    # Setup and Update {{{1
     def setup (self):
         self.me = settings.me
         self.you = settings.you
@@ -51,7 +76,6 @@ class World:
                 flavor=network.GameOver,
                 incoming=self.handle_game_over,
                 outgoing=self.handle_game_over)
-    # }}}1
 
     def update (self, time):
         for token in self:
@@ -71,9 +95,9 @@ class World:
             token.teardown()
 
     def refresh (self, you, button):
-        # The two arguments are technically token objects, but they are really
-        # degenerate since they came over the network and were never set up.
-        # In fact, they only have circle and velocity attributes.  
+        # The two arguments are technically token objects, but they came over
+        # the network and were never fully set up.  They only have circle and
+        # velocity attributes.  
 
         self.you.refresh(you)
         self.button.refresh(button)
@@ -82,7 +106,6 @@ class World:
         if eater is self.me:
             self.you.lose_health(1)
             you = self.you.get_health()
-            print "You have bitten the other player! Their health: %i" % you
 
             if self.you.get_health() <= 0:
                 self.game_over()
@@ -90,14 +113,13 @@ class World:
         elif eater is self.you:
             self.me.lose_health(1)
             me = self.me.get_health()
-            print "The other player has bitten you! Your health: %i" % me
 
         else:
             raise AssertionError
 
     def handle_flip_roles(self, eater, person, message):
         if eater is self.me: self.become_eater()
-        elif eater is message.you: self.become_person()
+        elif eater is self.you: self.become_person()
         else: raise AssertionError
 
     def handle_game_over(self, winner, loser, message):
@@ -120,35 +142,11 @@ class World:
         self.network.game_over()
 
     def flip_roles(self):
-        print "Switching roles!"
         self.network.flip_roles()
         self.move_button()
 
     def move_button(self):
         position = self.place_token()
         self.button.set_position(position)
-
     # }}}1
 
-    # Attributes {{{1
-    def is_eater (self):
-        return self.behavior
-
-    def is_person (self):
-        return not self.behavior
-
-    def is_playing (self):
-        return self.playing
-
-    def get_me (self):
-        return self.me
-    
-    def get_you (self):
-        return self.you
-
-    def get_button (self):
-        return self.button
-
-    def get_map (self):
-        return self.map
-    # }}}1

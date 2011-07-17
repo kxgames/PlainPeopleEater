@@ -54,7 +54,7 @@ class Game:
             for system in self:
                 system.update(time)
 
-        raw_input("Press any key to exit the game.")
+        raw_input("\nPress any key to exit the game.")
 
 if __name__ == "__main__":
     try: 

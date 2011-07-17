@@ -62,13 +62,10 @@ class Gui:
 
     # Draw {{{1
     def draw(self):
-        background_color = Color("black")
-        my_color = settings.my_color
-        your_color = settings.your_color
-        text_color = Color("green")
-
         screen = self.screen
-        screen.fill(background_color)
+
+        # Draw the background.
+        screen.fill(settings.background_color)
 
         # Draw the players.
         if self.world.is_eater():
@@ -114,7 +111,26 @@ class Gui:
         if len(points) > 2:
             pygame.draw.polygon(screen, color, points)
 
-        #pygame.draw.circle(screen, color, position, radius)
+        # Draw a status message.
+        template = "%s: %d HP"
+
+        me = self.world.get_me()
+        you = self.world.get_you()
+
+        my_status = template % (settings.my_name, me.get_health())
+        your_status = template % (settings.your_name, you.get_health())
+
+        map = self.world.get_map().get_size()
+        width, height = self.font.size(your_status)
+
+        my_position = 5, 5
+        your_position = map.width - width - 5, 5
+
+        my_message = self.font.render(my_status, True, settings.text_color)
+        your_message = self.font.render(your_status, True, settings.text_color)
+
+        screen.blit(my_message, my_position)
+        screen.blit(your_message, your_position)
 
         # Finish the update.
         pygame.display.flip()

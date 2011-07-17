@@ -106,7 +106,7 @@ class Player (Sprite):
     def refresh(self, ghost):
         self.set_circle(ghost.get_circle())
         self.set_velocity(ghost.get_velocity())
-    # }}}1
+
     # Attributes {{{1
     def is_eater(self):
         monster = self.world.is_eater()
