@@ -42,7 +42,8 @@ class Gui:
         self.size = self.map.get_size().get_pygame().size
         self.screen = pygame.display.set_mode(self.size)
 
-        self.font = pygame.font.Font(None, 20)
+        self.status_font = pygame.font.Font(None, 20)
+        self.big_font = pygame.font.Font(None, 50)
 
         # Set up the user controls.
         self.input = self.controls[settings.controller]
@@ -62,6 +63,7 @@ class Gui:
 
     # Draw {{{1
     def draw(self):
+        world = self.world
         screen = self.screen
 
         # Draw the background.
@@ -75,8 +77,8 @@ class Gui:
             my_color = settings.my_color
             your_color = settings.eater_color
 
-        me = self.world.get_me(), my_color
-        you = self.world.get_you(), your_color
+        me = world.get_me(), my_color
+        you = world.get_you(), your_color
         
         for player, color in me, you:
             position = player.get_position().get_pygame()
@@ -85,7 +87,7 @@ class Gui:
             pygame.draw.circle(screen, color, position, radius)
 
         # Draw the button.
-        button = self.world.get_button()
+        button = world.get_button()
 
         color = settings.button_color
         position = button.get_position().get_pygame()
@@ -114,20 +116,20 @@ class Gui:
         # Draw a status message.
         template = "%s: %d HP"
 
-        me = self.world.get_me()
-        you = self.world.get_you()
+        me = world.get_me()
+        you = world.get_you()
 
         my_status = template % (settings.my_name, me.get_health())
         your_status = template % (settings.your_name, you.get_health())
 
-        map = self.world.get_map().get_size()
-        width, height = self.font.size(your_status)
+        map = world.get_map().get_size()
+        width, height = self.status_font.size(your_status)
 
         my_position = 5, 5
         your_position = map.width - width - 5, 5
 
-        my_message = self.font.render(my_status, True, settings.text_color)
-        your_message = self.font.render(your_status, True, settings.text_color)
+        my_message = self.status_font.render(my_status, True, settings.text_color)
+        your_message = self.status_font.render(your_status, True, settings.text_color)
 
         screen.blit(my_message, my_position)
         screen.blit(your_message, your_position)

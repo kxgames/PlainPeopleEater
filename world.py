@@ -47,6 +47,9 @@ class World:
 
     def get_map (self):
         return self.map
+
+    def get_message(self):
+        return self.message
     # }}}1
 
     # Setup and Update {{{1
@@ -123,8 +126,8 @@ class World:
         else: raise AssertionError
 
     def handle_game_over(self, winner, loser, message):
-        print "You win!" if winner is self.me else "You lose!"
         self.playing = False
+        self.message = "You win!" if winner is self.me else "You lose!"
 
     def eat_player(self):
         self.network.eat_person()
