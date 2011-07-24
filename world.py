@@ -133,6 +133,7 @@ class World:
     def handle_game_over(self, winner, loser, message):
         self.playing = False
         self.message = "You win!" if winner is self.me else "You lose!"
+        print self.message
 
     def eat_player(self):
         self.network.eat_person()
