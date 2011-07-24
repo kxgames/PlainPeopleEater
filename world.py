@@ -127,6 +127,8 @@ class World:
             self.become_person()
             self.move_button()
 
+            self.button.elapsed = 0
+
         else: raise AssertionError
 
 
