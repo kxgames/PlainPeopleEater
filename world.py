@@ -121,9 +121,14 @@ class World:
             raise AssertionError
 
     def handle_flip_roles(self, eater, person, message):
-        if eater is self.me: self.become_eater()
-        elif eater is self.you: self.become_person()
+        if eater is self.me:
+            self.become_eater()
+        elif eater is self.you:
+            self.become_person()
+            self.move_button()
+
         else: raise AssertionError
+
 
     def handle_game_over(self, winner, loser, message):
         self.playing = False
@@ -146,7 +151,6 @@ class World:
 
     def flip_roles(self):
         self.network.flip_roles()
-        self.move_button()
 
     def move_button(self):
         position = self.place_token()
