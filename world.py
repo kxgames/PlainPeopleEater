@@ -137,7 +137,8 @@ class World:
         print self.message
 
     def eat_player(self):
-        self.network.eat_person()
+        if self.is_eater():
+            self.network.eat_person()
 
     def become_eater(self):
         self.behavior = True
