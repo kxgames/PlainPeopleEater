@@ -126,8 +126,7 @@ class World:
         elif eater is self.you:
             self.become_person()
             self.move_button()
-
-            self.button.elapsed = 0
+            self.button.reset_timer()
 
         else: raise AssertionError
 

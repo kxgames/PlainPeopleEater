@@ -164,6 +164,9 @@ class Button (Sprite):
         if not self.world.is_eater(): return
         self.set_circle(ghost.get_circle())
 
+    def reset_timer (self):
+        self.elapsed = 0
+
     def get_elapsed(self):
         return self.elapsed
 
