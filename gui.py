@@ -91,9 +91,10 @@ class Gui:
 
         color = settings.button_color
         position = button.get_position().get_pygame()
-
         radius = button.get_radius()
-        progress = 1 - button.get_elapsed() / button.get_timeout()
+
+        if world.is_eater(): progress = 1
+        else: progress = 1 - button.get_elapsed() / button.get_timeout()
         
         points = [position]
 
